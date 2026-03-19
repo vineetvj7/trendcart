@@ -1,0 +1,17 @@
+<body style="background:#0f172a;color:white;text-align:center">
+
+<h2>📊 Earnings</h2>
+
+<script>
+let totalClicks = 0;
+let clicks = JSON.parse(localStorage.getItem("clicks") || "{}");
+
+for(let k in clicks){ totalClicks += clicks[k]; }
+
+let sales = totalClicks * 0.03;
+let earnings = sales * 30;
+
+document.write(`<h3>Clicks: ${totalClicks}</h3>`);
+document.write(`<h3>Sales: ${Math.round(sales)}</h3>`);
+document.write(`<h2>₹${Math.round(earnings)}</h2>`);
+</script>
