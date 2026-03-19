@@ -1,0 +1,2 @@
+# trendcart
+Amazon deals
