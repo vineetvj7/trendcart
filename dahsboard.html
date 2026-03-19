@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<body style="background:#0f172a;color:white;font-family:Arial;padding:10px">
+
+<h2>🔥 Dashboard</h2>
+
+<input id="name" placeholder="Product">
+<input id="price" placeholder="Price">
+<input id="image" placeholder="Image URL">
+<input id="link" placeholder="Affiliate Link">
+<input id="category" placeholder="Category">
+
+<button onclick="add()">Add Product</button>
+
+<div id="list"></div>
+
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const app = initializeApp({
+ apiKey:"YOUR_API_KEY",
+ authDomain:"YOUR_DOMAIN",
+ projectId:"YOUR_PROJECT_ID"
+});
+
+const db = getFirestore(app);
+
+window.add = async ()=>{
+ await addDoc(collection(db,"products"),{
+  name:name.value,
+  price:price.value,
+  image:image.value,
+  link:link.value,
+  category:category.value,
+  clicks:0
+ });
+ load();
+};
+
+async function load(){
+ let html="";
+ let bestScore=0;
+ let best="";
+
+ let products=[];
+
+ const snap=await getDocs(collection(db,"products"));
+
+ snap.forEach(doc=>{
+  let p=doc.data();
+  products.push({...p,id:doc.id});
+ });
+
+ products.forEach(p=>{
+  let score=(p.clicks||0)+(p.clicks*0.03*30);
+  if(score>bestScore){bestScore=score;best=p.name;}
+ });
+
+ products.forEach(p=>{
+  let clicks=p.clicks||0;
+  let earnings=clicks*0.03*30;
+
+  let highlight=p.name===best?"border:2px solid gold":"";
+
+  html+=`
+   <div style="background:#1e293b;margin:10px;padding:10px;${highlight}">
+    <b>${p.name}</b> ₹${p.price}<br>
+    Clicks: ${clicks}<br>
+    Earnings: ₹${Math.round(earnings)}<br>
+
+    ${p.name===best?"🔥 BEST":""}
+    ${clicks<5?"❌ LOW":""}
+
+    <button onclick="gen('${p.name}','${p.price}')">🎬 Reel</button>
+   </div>
+  `;
+ });
+
+ document.getElementById("list").innerHTML=html;
+}
+
+window.gen=(name,price)=>{
+ let div=document.createElement("div");
+ div.style.width="360px";div.style.height="640px";
+ div.style.background="black";div.style.color="white";
+ div.style.display="flex";div.style.alignItems="center";
+ div.style.justifyContent="center";div.style.textAlign="center";
+ div.style.fontSize="26px";
+
+ div.innerText=`₹999 ka ${name} sirf ₹${price} 😳`;
+
+ document.body.appendChild(div);
+
+ html2canvas(div).then(c=>{
+  let a=document.createElement("a");
+  a.download="reel.png";
+  a.href=c.toDataURL();
+  a.click();
+ });
+};
+
+load();
+</script>
+
+</body>
+</html>
