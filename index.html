@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());
+gtag('config','G-XXXXXXXXXX');
+</script>
+
+<style>
+body { background:#0f172a;color:white;font-family:Arial;margin:0 }
+
+.header { padding:15px;text-align:center;background:#020617;font-weight:bold }
+
+#categoryBar { display:flex;overflow:auto;padding:10px;gap:10px }
+#categoryBar button { background:#1e293b;border:none;padding:8px 15px;border-radius:20px;color:white }
+
+.grid { display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:10px }
+
+.card { background:#1e293b;border-radius:12px;overflow:hidden }
+.card img { width:100%;height:150px;object-fit:cover }
+
+.price { color:#22c55e;padding:5px }
+.btn { display:block;background:#16a34a;text-align:center;padding:8px;margin:5px;border-radius:8px;color:white;text-decoration:none }
+</style>
+
+</head>
+
+<body>
+
+<div class="header">🔥 Trending Deals</div>
+
+<div id="categoryBar"></div>
+<div id="products" class="grid"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const app = initializeApp({
+ apiKey:"YOUR_API_KEY",
+ authDomain:"YOUR_DOMAIN",
+ projectId:"YOUR_PROJECT_ID"
+});
+
+const db = getFirestore(app);
+
+let all=[];
+
+const snap=await getDocs(collection(db,"products"));
+
+snap.forEach(doc=>{
+ all.push({...doc.data(),id:doc.id});
+});
+
+// categories auto
+let cats=new Set();
+all.forEach(p=>cats.add(p.category));
+
+let cHTML=`<button onclick="filter('all')">All</button>`;
+cats.forEach(c=>cHTML+=`<button onclick="filter('${c}')">${c}</button>`);
+
+document.getElementById("categoryBar").innerHTML=cHTML;
+
+// display
+function show(data){
+ let html="";
+ data.forEach(p=>{
+  html+=`
+   <div class="card">
+    <img src="${p.image}">
+    <h3>${p.name}</h3>
+    <div class="price">₹${p.price}</div>
+
+    <a class="btn"
+    href="redirect.html?url=${encodeURIComponent(p.link)}&id=${p.id}">
+    Buy Now
+    </a>
+   </div>
+  `;
+ });
+ document.getElementById("products").innerHTML=html;
+}
+
+window.filter=(c)=> c==="all"?show(all):show(all.filter(p=>p.category===c));
+
+show(all);
+</script>
+
+</body>
+</html>
