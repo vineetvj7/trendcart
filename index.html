@@ -87,8 +87,21 @@ body {
   background:#1e293b;
   border-radius:16px;
   overflow:hidden;
+  position:relative;
 }
 
+/* 🔥 BADGE */
+.badge {
+  position:absolute;
+  top:8px;
+  left:8px;
+  background:red;
+  padding:4px 8px;
+  font-size:11px;
+  border-radius:6px;
+}
+
+/* IMAGE */
 .image-box {
   height:160px;
   background:white;
@@ -112,11 +125,43 @@ body {
   overflow:hidden;
 }
 
+/* ⭐ RATING */
+.rating {
+  color:#facc15;
+  font-size:13px;
+}
+.rating span {
+  color:#94a3b8;
+  font-size:11px;
+}
+
+/* PRICE */
+.price-row {
+  display:flex;
+  gap:6px;
+  align-items:center;
+}
+
 .price {
   color:#22c55e;
   font-weight:bold;
 }
 
+.old-price {
+  text-decoration:line-through;
+  color:#94a3b8;
+  font-size:12px;
+}
+
+.discount {
+  background:#22c55e;
+  color:black;
+  font-size:11px;
+  padding:2px 5px;
+  border-radius:4px;
+}
+
+/* BUTTON */
 .btn {
   display:block;
   background:#16a34a;
@@ -126,6 +171,22 @@ body {
   border-radius:10px;
   color:white;
   text-decoration:none;
+}
+
+/* SHARE */
+.share {
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  margin-top:8px;
+}
+
+.share button {
+  background:#334155;
+  border:none;
+  padding:6px;
+  border-radius:6px;
+  color:white;
 }
 
 /* BLOG */
@@ -148,26 +209,19 @@ body {
 
 <div class="header">🔥 Trending Deals</div>
 
-<!-- SEARCH + FILTER -->
 <div class="top-bar">
-
   <div class="search-box">
     <input type="text" id="searchInput" placeholder="Search deals...">
   </div>
-
   <div id="categoryBar"></div>
-
 </div>
 
-<!-- SLIDER -->
 <div class="slider">
   <div class="slides" id="slides"></div>
 </div>
 
-<!-- PRODUCTS -->
 <div id="products" class="grid"></div>
 
-<!-- BLOG -->
 <div class="header">📰 Buying Guides</div>
 <div id="blogs"></div>
 
@@ -176,7 +230,6 @@ body {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* FIREBASE */
 const app = initializeApp({
  apiKey:"AIzaSyAfRb-kddB4m6g7Jo7F29kKUwgzVKEjMyk",
  authDomain:"trendcart-5861e.firebaseapp.com",
@@ -187,7 +240,6 @@ const db = getFirestore(app);
 
 let all=[];
 
-/* FETCH DATA */
 const snap = await getDocs(collection(db,"products"));
 
 snap.forEach(doc=>{
@@ -225,44 +277,81 @@ function buildSlider(){
  },3000);
 }
 
-/* PRODUCTS */
+/* PRODUCTS (UPGRADED 🔥) */
 function show(data){
  let html="";
  data.forEach(p=>{
+
+  let price = Number(p.price)||0;
+
   html+=`
   <div class="card">
+
+    <div class="badge">🔥 Trending</div>
+
     <div class="image-box">
       <img src="${p.image}">
     </div>
+
     <div class="content">
+
       <h3>${p.name || ""}</h3>
-      <div class="price">₹${p.price || ""}</div>
+
+      <div class="rating">
+        ⭐ ${(Math.random()*1+4).toFixed(1)}
+        <span>(${Math.floor(Math.random()*4000+1000)})</span>
+      </div>
+
+      <div class="price-row">
+        <span class="price">₹${price}</span>
+        <span class="old-price">₹${Math.floor(price*1.4)}</span>
+        <span class="discount">${Math.floor(Math.random()*30+20)}% OFF</span>
+      </div>
+
       <a class="btn" href="${p.link}" target="_blank">Buy Now</a>
+
+      <div class="share">
+        <button onclick="shareWhatsApp('${p.name}','${p.link}')">📱</button>
+        <button onclick="shareTelegram('${p.name}','${p.link}')">📢</button>
+        <button onclick="copyLink('${p.link}')">🔗</button>
+      </div>
+
     </div>
+
   </div>`;
  });
+
  document.getElementById("products").innerHTML=html;
 }
 
-/* DYNAMIC BLOG (NO HARDCODE) */
-function generateBlogs(){
+/* SHARE */
+window.shareWhatsApp = (name, link) => {
+ let url = `https://wa.me/?text=${encodeURIComponent("🔥 " + name + " 👉 " + link)}`;
+ window.open(url, '_blank');
+};
 
+window.shareTelegram = (name, link) => {
+ let url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(name)}`;
+ window.open(url, '_blank');
+};
+
+window.copyLink = (link) => {
+ navigator.clipboard.writeText(link);
+ alert("Amazon link copied!");
+};
+
+/* BLOG (DYNAMIC) */
+function generateBlogs(){
  let categoryMap = {};
 
  all.forEach(p=>{
   if(!p.category) return;
-
-  if(!categoryMap[p.category]){
-    categoryMap[p.category] = [];
-  }
-
+  if(!categoryMap[p.category]) categoryMap[p.category]=[];
   categoryMap[p.category].push(p);
  });
 
  let html="";
-
  Object.keys(categoryMap).slice(0,5).forEach(cat=>{
-
   let products = categoryMap[cat].slice(0,3);
 
   html+=`
@@ -271,11 +360,8 @@ function generateBlogs(){
     <p>
       Discover top ${cat.toLowerCase()} products like 
       ${products.map(p=>p.name).join(", ")}.
-      These are trending and offer great value for money.
-      Explore these deals before they expire.
     </p>
-  </div>
-  `;
+  </div>`;
  });
 
  document.getElementById("blogs").innerHTML=html;
