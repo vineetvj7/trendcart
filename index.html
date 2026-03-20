@@ -157,10 +157,28 @@ body {
   color:white;
 }
 
-/* BLOG */
-.blog { padding:15px; }
-.blog h2 { font-size:18px; }
-.blog p { color:#cbd5f5; }
+/* FOOTER */
+#footer {
+  background:#020617;
+  padding:15px;
+  text-align:center;
+}
+
+.footer-cats {
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:10px;
+}
+
+.footer-cats button {
+  background:#1e293b;
+  border:none;
+  padding:6px 12px;
+  border-radius:20px;
+  color:white;
+  font-size:12px;
+}
 
 /* TOAST */
 #toast {
@@ -196,8 +214,7 @@ body {
 
 <div id="products"></div>
 
-<div class="header">📰 Buying Guides</div>
-<div id="blogs"></div>
+<div id="footer"></div>
 
 <div id="toast"></div>
 
@@ -234,22 +251,28 @@ let cHTML=`<button onclick="filter('all')">All</button>`;
 cats.forEach(c=>cHTML+=`<button onclick="filter('${c}')">${c}</button>`);
 document.getElementById("categoryBar").innerHTML=cHTML;
 
-/* SLIDER */
+/* SLIDER FIXED */
 function buildSlider(){
+
+ let top = all.slice(0,5);
  let html="";
- all.slice(0,5).forEach(p=>{
+
+ top.forEach(p=>{
   html+=`<div class="slide"><img src="${p.image}"></div>`;
  });
+
  document.getElementById("slides").innerHTML=html;
 
  let i=0;
+
  setInterval(()=>{
-  i=(i+1)%5;
-  document.getElementById("slides").style.transform=`translateX(-${i*100}%)`;
+  i = (i + 1) % top.length; // ✅ FIX
+  document.getElementById("slides").style.transform =
+    `translateX(-${i*100}%)`;
  },3000);
 }
 
-/* PRODUCTS (FINAL CLEAN) */
+/* PRODUCTS */
 function show(data){
 
  let html=`<div class="grid">`;
@@ -319,25 +342,20 @@ function toast(msg){
  setTimeout(()=>t.style.display="none",2000);
 }
 
-/* BLOG */
-function generateBlogs(){
- let map={};
- all.forEach(p=>{
-  if(!p.category) return;
-  if(!map[p.category]) map[p.category]=[];
-  map[p.category].push(p);
+/* FOOTER */
+function buildFooter(){
+
+ let html = `<div class="footer-cats">`;
+
+ html += `<button onclick="filter('all')">All</button>`;
+
+ cats.forEach(c=>{
+  html += `<button onclick="filter('${c}')">${c}</button>`;
  });
 
- let html="";
- Object.keys(map).slice(0,5).forEach(cat=>{
-  html+=`
-  <div class="blog">
-    <h2>Best ${cat} Deals</h2>
-    <p>${map[cat].slice(0,3).map(p=>p.name).join(", ")}</p>
-  </div>`;
- });
+ html += `</div>`;
 
- document.getElementById("blogs").innerHTML=html;
+ document.getElementById("footer").innerHTML = html;
 }
 
 /* FILTER */
@@ -346,7 +364,7 @@ window.filter=(c)=> c==="all"?show(all):show(all.filter(p=>p.category===c));
 /* INIT */
 buildSlider();
 show(all);
-generateBlogs();
+buildFooter();
 
 </script>
 
