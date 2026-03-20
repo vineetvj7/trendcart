@@ -98,11 +98,18 @@ body {
   display:flex;
   flex-direction:column;
   flex-grow:1;
+  min-height:120px; /* keeps cards aligned */
 }
 
+/* ✅ FIXED TITLE */
 .content h3 {
   font-size:14px;
-  height:40px;
+  line-height:1.3;
+
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+
   overflow:hidden;
 }
 
@@ -128,17 +135,27 @@ body {
 
 /* SHARE */
 .share {
+  display:flex;
+  gap:8px;
   margin-top:10px;
 }
+
 .share button {
-  width:100%;
-  background:#25D366;
+  flex:1;
   border:none;
   padding:10px;
   border-radius:10px;
   color:white;
-  font-size:16px;
+  font-size:14px;
   cursor:pointer;
+}
+
+.share button:first-child {
+  background:#25D366;
+}
+
+.share button:last-child {
+  background:#334155;
 }
 
 /* FOOTER */
@@ -241,7 +258,11 @@ function show(data){
 
       <div class="share">
         <button onclick="shareWhatsApp('${p.name}','${p.link}')">
-          📱 Share on WhatsApp
+          📱 WhatsApp
+        </button>
+
+        <button onclick="shareNative('${p.name}','${p.link}')">
+          📤 Share
         </button>
       </div>
     </div>
@@ -255,10 +276,26 @@ function show(data){
 /* FILTER */
 window.filter=(c)=> c==="all"?show(all):show(all.filter(p=>p.category===c));
 
-/* SHARE */
+/* SHARE WHATSAPP */
 window.shareWhatsApp=(name,link)=>{
  let url=`https://wa.me/?text=${encodeURIComponent(name+" "+link)}`;
  window.open(url,'_blank');
+};
+
+/* NATIVE SHARE */
+window.shareNative=(name,link)=>{
+
+ if(navigator.share){
+   navigator.share({
+     title:name,
+     text:"🔥 Check this deal",
+     url:link
+   });
+ } else {
+   navigator.clipboard.writeText(link);
+   alert("Link copied! Paste on Instagram or anywhere.");
+ }
+
 };
 
 /* INIT */
