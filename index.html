@@ -1,8 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>🔥 Trending Deals India</title>
+
+<!-- AdSense -->
+<script async 
+ src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXX"
+ crossorigin="anonymous"></script>
 
 <style>
 
@@ -20,25 +28,49 @@ body {
   text-align:center;
   font-size:22px;
   font-weight:bold;
-  background:#020617;
 }
 
-/* CATEGORY BAR */
+/* SEARCH */
+.search-box { padding:10px; }
+.search-box input {
+  width:100%;
+  padding:12px;
+  border-radius:25px;
+  border:none;
+}
+
+/* SLIDER */
+.slider {
+  overflow:hidden;
+  margin:10px;
+  border-radius:12px;
+}
+.slides {
+  display:flex;
+  transition:0.5s;
+}
+.slide {
+  min-width:100%;
+}
+.slide img {
+  width:100%;
+  height:180px;
+  object-fit:cover;
+}
+
+/* CATEGORY */
 #categoryBar {
   display:flex;
   overflow:auto;
   padding:10px;
   gap:10px;
 }
-
 #categoryBar button {
   background:#1e293b;
   border:none;
   padding:8px 15px;
   border-radius:20px;
   color:white;
-  cursor:pointer;
-  white-space:nowrap;
 }
 
 /* GRID */
@@ -54,27 +86,9 @@ body {
   background:#1e293b;
   border-radius:16px;
   overflow:hidden;
-  position:relative;
   box-shadow:0 8px 20px rgba(0,0,0,0.5);
-  transition:0.3s;
 }
 
-.card:hover {
-  transform:translateY(-6px) scale(1.02);
-}
-
-/* BADGE */
-.badge {
-  position:absolute;
-  top:10px;
-  left:10px;
-  background:red;
-  padding:4px 8px;
-  font-size:11px;
-  border-radius:6px;
-}
-
-/* IMAGE */
 .image-box {
   height:160px;
   background:white;
@@ -82,90 +96,53 @@ body {
   align-items:center;
   justify-content:center;
 }
-
 .image-box img {
   max-width:100%;
   max-height:100%;
   object-fit:contain;
 }
 
-/* CONTENT */
-.content {
-  padding:10px;
-}
+.content { padding:10px; }
 
-/* TITLE */
 .content h3 {
   font-size:14px;
-  height:40px;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
   overflow:hidden;
 }
 
-/* RATING */
-.rating {
-  color:#facc15;
-  font-size:13px;
-  margin-top:5px;
-}
+.rating { color:#facc15; font-size:13px; }
+.price { color:#22c55e; font-weight:bold; }
 
-.rating span {
-  color:#94a3b8;
-  font-size:11px;
-}
-
-/* PRICE */
-.price-row {
-  display:flex;
-  gap:8px;
-  align-items:center;
-  margin-top:6px;
-}
-
-.price {
-  color:#22c55e;
-  font-weight:bold;
-  font-size:16px;
-}
-
-.old-price {
-  text-decoration:line-through;
-  color:#94a3b8;
-  font-size:12px;
-}
-
-/* BUTTON */
 .btn {
   display:block;
-  background:linear-gradient(90deg,#16a34a,#22c55e);
+  background:#16a34a;
   text-align:center;
   padding:10px;
   margin-top:10px;
   border-radius:10px;
-  font-weight:bold;
+  color:white;
   text-decoration:none;
-  color:white;
 }
 
-/* SHARE */
-.share {
-  display:flex;
-  justify-content:center;
-  gap:8px;
-  margin-top:8px;
+/* BLOG */
+.blog-card {
+  background:#111827;
+  padding:12px;
+  border-radius:12px;
 }
+.blog-card h2 { font-size:16px; }
+.blog-card p { font-size:13px; color:#9ca3af; }
+.blog-card a { color:#22c55e; }
 
-.share button {
-  background:#334155;
-  border:none;
-  padding:6px;
-  border-radius:6px;
-  color:white;
-  cursor:pointer;
-}
-
-/* MOBILE */
-@media(max-width:600px){
-  .grid { grid-template-columns:repeat(2,1fr); }
+/* ADS */
+.ad-box {
+  margin:15px;
+  text-align:center;
+  background:#111827;
+  padding:10px;
+  border-radius:10px;
 }
 
 </style>
@@ -176,15 +153,50 @@ body {
 
 <div class="header">🔥 Trending Deals</div>
 
+<!-- SEARCH -->
+<div class="search-box">
+  <input type="text" id="searchInput" placeholder="Search deals...">
+</div>
+
+<!-- SLIDER -->
+<div class="slider">
+  <div class="slides" id="slides"></div>
+</div>
+
+<!-- AD TOP -->
+<div class="ad-box">
+  <ins class="adsbygoogle"
+    style="display:block"
+    data-ad-client="ca-pub-XXXXXXXX"
+    data-ad-slot="1234567890"
+    data-ad-format="auto"></ins>
+</div>
+
+<!-- CATEGORY -->
 <div id="categoryBar"></div>
+
+<!-- PRODUCTS -->
 <div id="products" class="grid"></div>
+
+<!-- BLOG SECTION -->
+<div class="header">📰 Latest Blogs</div>
+<div id="blogs" class="grid"></div>
+
+<!-- AD BOTTOM -->
+<div class="ad-box">
+  <ins class="adsbygoogle"
+    style="display:block"
+    data-ad-client="ca-pub-XXXXXXXX"
+    data-ad-slot="9876543210"
+    data-ad-format="auto"></ins>
+</div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* FIREBASE CONFIG */
+/* FIREBASE */
 const app = initializeApp({
  apiKey:"AIzaSyAfRb-kddB4m6g7Jo7F29kKUwgzVKEjMyk",
  authDomain:"trendcart-5861e.firebaseapp.com",
@@ -195,94 +207,90 @@ const db = getFirestore(app);
 
 let all=[];
 
-/* FETCH DATA */
+/* FETCH */
 const snap = await getDocs(collection(db,"products"));
 
 snap.forEach(doc=>{
  all.push({...doc.data(), id:doc.id});
 });
 
-/* CATEGORY BUILD */
-let cats = new Set();
-all.forEach(p => p.category && cats.add(p.category));
+/* SEARCH */
+document.getElementById("searchInput").addEventListener("input",(e)=>{
+ let val=e.target.value.toLowerCase();
+ show(all.filter(p=> (p.name||"").toLowerCase().includes(val)));
+});
 
-let cHTML = `<button onclick="filter('all')">All</button>`;
-cats.forEach(c => cHTML += `<button onclick="filter('${c}')">${c}</button>`);
+/* CATEGORY */
+let cats=new Set();
+all.forEach(p=>p.category && cats.add(p.category));
 
-document.getElementById("categoryBar").innerHTML = cHTML;
+let cHTML=`<button onclick="filter('all')">All</button>`;
+cats.forEach(c=>cHTML+=`<button onclick="filter('${c}')">${c}</button>`);
 
-/* DISPLAY */
+document.getElementById("categoryBar").innerHTML=cHTML;
+
+/* SLIDER */
+function buildSlider(){
+ let top = all.slice(0,5);
+ let html="";
+ top.forEach(p=>{
+  html+=`<div class="slide"><img src="${p.image}"></div>`;
+ });
+ document.getElementById("slides").innerHTML=html;
+
+ let i=0;
+ setInterval(()=>{
+  i=(i+1)%top.length;
+  document.getElementById("slides").style.transform=`translateX(-${i*100}%)`;
+ },3000);
+}
+
+/* PRODUCTS */
 function show(data){
  let html="";
-
  data.forEach(p=>{
-  let redirectLink = `redirect.html?url=${encodeURIComponent(p.link)}&id=${p.id}`;
-
-  html += `
-   <div class="card">
-
-    <div class="badge">🔥 Trending</div>
-
+  html+=`
+  <div class="card">
     <div class="image-box">
       <img src="${p.image}">
     </div>
-
     <div class="content">
-
-      <h3>${(p.name || "").slice(0,60)}</h3>
-
-      <div class="rating">
-        ⭐ ${p.rating || 4.3} <span>(${p.reviews || "1k"} reviews)</span>
-      </div>
-
-      <div class="price-row">
-        <span class="price">₹${p.price || ""}</span>
-        <span class="old-price">₹${Math.floor((p.price||1000)*1.4)}</span>
-      </div>
-
-      <a class="btn" href="${redirectLink}">
-        Buy Now
-      </a>
-
-      <div class="share">
-        <button onclick="shareWhatsApp('${p.name}','${p.link}')">📱</button>
-        <button onclick="shareTelegram('${p.name}','${p.link}')">📢</button>
-        <button onclick="copyLink('${p.link}')">🔗</button>
-      </div>
-
+      <h3>${(p.name||"").slice(0,60)}</h3>
+      <div class="rating">⭐ ${p.rating||4.3}</div>
+      <div class="price">₹${p.price||""}</div>
+      <a class="btn" href="${p.link}" target="_blank">Buy Now</a>
     </div>
+  </div>`;
+ });
+ document.getElementById("products").innerHTML=html;
 
-   </div>
-  `;
+ (adsbygoogle = window.adsbygoogle || []).push({});
+}
+
+/* BLOG AUTO GENERATE */
+function generateBlogs(){
+ let html="";
+ let topProducts = all.slice(0,10);
+
+ topProducts.forEach(p=>{
+  html+=`
+  <div class="blog-card">
+    <h2>Best Deal on ${(p.name||"").slice(0,40)}</h2>
+    <p>Buy ${(p.name||"")} at ₹${p.price}. Limited time Amazon deal.</p>
+    <a href="${p.link}" target="_blank">Read More →</a>
+  </div>`;
  });
 
- document.getElementById("products").innerHTML = html;
+ document.getElementById("blogs").innerHTML=html;
 }
 
 /* FILTER */
-window.filter = (c) => {
- if(c==="all") show(all);
- else show(all.filter(p => p.category === c));
-};
-
-/* SHARE FUNCTIONS (AMAZON LINK ONLY) */
-window.shareWhatsApp = (name, link) => {
- let url = `https://wa.me/?text=${encodeURIComponent("🔥 " + name + " 👉 " + link)}`;
- window.open(url, '_blank');
-};
-
-window.shareTelegram = (name, link) => {
- let url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(name)}`;
- window.open(url, '_blank');
-};
-
-window.copyLink = (link) => {
- navigator.clipboard.writeText(link);
- alert("Amazon link copied!");
-};
+window.filter=(c)=> c==="all"?show(all):show(all.filter(p=>p.category===c));
 
 /* INIT */
+buildSlider();
 show(all);
+generateBlogs();
 
 </script>
 
