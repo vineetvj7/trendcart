@@ -14,20 +14,126 @@ gtag('config','G-XXXXXXXXXX');
 </script>
 
 <style>
-body { background:#0f172a;color:white;font-family:Arial;margin:0 }
 
-.header { padding:15px;text-align:center;background:#020617;font-weight:bold }
+/* BASE */
+body {
+  background:#0f172a;
+  color:white;
+  font-family:Arial;
+  margin:0;
+}
 
-#categoryBar { display:flex;overflow:auto;padding:10px;gap:10px }
-#categoryBar button { background:#1e293b;border:none;padding:8px 15px;border-radius:20px;color:white }
+/* HEADER */
+.header {
+  padding:15px;
+  text-align:center;
+  background:#020617;
+  font-weight:bold;
+  font-size:20px;
+}
 
-.grid { display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:10px }
+/* CATEGORY BAR */
+#categoryBar {
+  display:flex;
+  overflow:auto;
+  padding:10px;
+  gap:10px;
+}
 
-.card { background:#1e293b;border-radius:12px;overflow:hidden }
-.card img { width:100%;height:150px;object-fit:cover }
+#categoryBar button {
+  background:#1e293b;
+  border:none;
+  padding:8px 15px;
+  border-radius:20px;
+  color:white;
+  cursor:pointer;
+  white-space:nowrap;
+}
 
-.price { color:#22c55e;padding:5px }
-.btn { display:block;background:#16a34a;text-align:center;padding:8px;margin:5px;border-radius:8px;color:white;text-decoration:none }
+#categoryBar button:hover {
+  background:#334155;
+}
+
+/* GRID */
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:15px;
+  padding:15px;
+}
+
+/* CARD */
+.card {
+  background:#1e293b;
+  border-radius:14px;
+  overflow:hidden;
+  transition:0.3s;
+  box-shadow:0 4px 10px rgba(0,0,0,0.4);
+}
+
+.card:hover {
+  transform:translateY(-5px);
+}
+
+/* IMAGE FIX (IMPORTANT 🔥) */
+.image-box {
+  width:100%;
+  height:180px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.image-box img {
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;   /* FIXED */
+  transition:0.3s;
+}
+
+.card:hover img {
+  transform:scale(1.05);
+}
+
+/* TEXT */
+.card h3 {
+  font-size:14px;
+  padding:8px;
+  height:40px;
+  overflow:hidden;
+}
+
+/* PRICE */
+.price {
+  color:#22c55e;
+  padding:0 8px;
+  font-weight:bold;
+}
+
+/* BUTTON */
+.btn {
+  display:block;
+  background:linear-gradient(90deg,#16a34a,#22c55e);
+  text-align:center;
+  padding:10px;
+  margin:10px;
+  border-radius:8px;
+  color:white;
+  text-decoration:none;
+  font-weight:bold;
+  transition:0.3s;
+}
+
+.btn:hover {
+  background:linear-gradient(90deg,#22c55e,#4ade80);
+}
+
+/* MOBILE */
+@media(max-width:600px){
+  .image-box { height:150px }
+}
+
 </style>
 
 </head>
@@ -40,9 +146,11 @@ body { background:#0f172a;color:white;font-family:Arial;margin:0 }
 <div id="products" class="grid"></div>
 
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* FIREBASE CONFIG */
 const app = initializeApp({
  apiKey:"AIzaSyAfRb-kddB4m6g7Jo7F29kKUwgzVKEjMyk",
  authDomain:"trendcart-5861e.firebaseapp.com",
@@ -53,44 +161,59 @@ const db = getFirestore(app);
 
 let all=[];
 
-const snap=await getDocs(collection(db,"products"));
+/* FETCH DATA */
+const snap = await getDocs(collection(db,"products"));
 
 snap.forEach(doc=>{
- all.push({...doc.data(),id:doc.id});
+ all.push({...doc.data(), id:doc.id});
 });
 
-// categories auto
-let cats=new Set();
-all.forEach(p=>cats.add(p.category));
+/* CATEGORY BUILD */
+let cats = new Set();
+all.forEach(p => p.category && cats.add(p.category));
 
-let cHTML=`<button onclick="filter('all')">All</button>`;
-cats.forEach(c=>cHTML+=`<button onclick="filter('${c}')">${c}</button>`);
+let cHTML = `<button onclick="filter('all')">All</button>`;
+cats.forEach(c => cHTML += `<button onclick="filter('${c}')">${c}</button>`);
 
-document.getElementById("categoryBar").innerHTML=cHTML;
+document.getElementById("categoryBar").innerHTML = cHTML;
 
-// display
+/* DISPLAY */
 function show(data){
  let html="";
+
  data.forEach(p=>{
-  html+=`
+  html += `
    <div class="card">
-    <img src="${p.image}">
-    <h3>${p.name}</h3>
-    <div class="price">₹${p.price}</div>
+
+    <div class="image-box">
+      <img src="${p.image}" alt="product">
+    </div>
+
+    <h3>${(p.name || "").slice(0,60)}</h3>
+
+    <div class="price">₹${p.price || ""}</div>
 
     <a class="btn"
-    href="redirect.html?url=${encodeURIComponent(p.link)}&id=${p.id}">
-    Buy Now
+      href="redirect.html?url=${encodeURIComponent(p.link)}&id=${p.id}">
+      Buy Now
     </a>
+
    </div>
   `;
  });
- document.getElementById("products").innerHTML=html;
+
+ document.getElementById("products").innerHTML = html;
 }
 
-window.filter=(c)=> c==="all"?show(all):show(all.filter(p=>p.category===c));
+/* FILTER */
+window.filter = (c) => {
+ if(c==="all") show(all);
+ else show(all.filter(p => p.category === c));
+};
 
+/* INIT */
 show(all);
+
 </script>
 
 </body>
