@@ -241,19 +241,19 @@ window.filter = (c) => {
 
 /* SHARE FUNCTIONS */
 window.shareWhatsApp = (name, link) => {
-  const fullLink = windows.location.origin + "/" + link;
+  const fullLink = window.location.origin + "/" + link;
  let url = `https://wa.me/?text=${encodeURIComponent(name + " " + fullLink)}`;
  window.open(url, '_blank');
 };
 
 window.shareTelegram = (name, link) => {
-  const fullLink = windows.location.origin + "/" + link;
+  const fullLink = window.location.origin + "/" + link;
  let url = `https://t.me/share/url?url=${encodeURIComponent(fullLink)}&text=${encodeURIComponent(name)}`;
  window.open(url, '_blank');
 };
 
 window.copyLink = (link) => {
- const fullLink = windows.location.origin + "/" + link;
+ const fullLink = window.location.origin + "/" + link;
  navigator.clipboard.writeText(fullLink);
 
 };
