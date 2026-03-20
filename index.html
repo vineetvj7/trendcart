@@ -26,11 +26,8 @@ body {
 }
 
 /* TOP BAR */
-.top-bar {
-  padding:10px;
-}
+.top-bar { padding:10px; }
 
-/* SEARCH */
 .search-box input {
   width:100%;
   padding:12px;
@@ -54,23 +51,10 @@ body {
 }
 
 /* SLIDER */
-.slider {
-  overflow:hidden;
-  margin:10px;
-  border-radius:12px;
-}
-.slides {
-  display:flex;
-  transition:0.5s;
-}
-.slide {
-  min-width:100%;
-}
-.slide img {
-  width:100%;
-  height:180px;
-  object-fit:cover;
-}
+.slider { overflow:hidden;margin:10px;border-radius:12px; }
+.slides { display:flex;transition:0.5s; }
+.slide { min-width:100%; }
+.slide img { width:100%;height:180px;object-fit:cover; }
 
 /* GRID */
 .grid {
@@ -88,7 +72,6 @@ body {
   position:relative;
 }
 
-/* BADGE */
 .badge {
   position:absolute;
   top:8px;
@@ -124,14 +107,8 @@ body {
 }
 
 /* RATING */
-.rating {
-  color:#facc15;
-  font-size:13px;
-}
-.rating span {
-  color:#94a3b8;
-  font-size:11px;
-}
+.rating { color:#facc15;font-size:13px; }
+.rating span { color:#94a3b8;font-size:11px; }
 
 /* PRICE */
 .price-row {
@@ -139,18 +116,12 @@ body {
   gap:6px;
   align-items:center;
 }
-
-.price {
-  color:#22c55e;
-  font-weight:bold;
-}
-
+.price { color:#22c55e;font-weight:bold; }
 .old-price {
   text-decoration:line-through;
   color:#94a3b8;
   font-size:12px;
 }
-
 .discount {
   background:#22c55e;
   color:black;
@@ -187,16 +158,9 @@ body {
 }
 
 /* BLOG */
-.blog {
-  padding:15px;
-}
-.blog h2 {
-  font-size:18px;
-}
-.blog p {
-  font-size:14px;
-  color:#cbd5f5;
-}
+.blog { padding:15px; }
+.blog h2 { font-size:18px; }
+.blog p { color:#cbd5f5; }
 
 /* TOAST */
 #toast {
@@ -230,7 +194,7 @@ body {
   <div class="slides" id="slides"></div>
 </div>
 
-<div id="products" class="grid"></div>
+<div id="products"></div>
 
 <div class="header">📰 Buying Guides</div>
 <div id="blogs"></div>
@@ -248,16 +212,13 @@ const app = initializeApp({
  authDomain:"trendcart-5861e.firebaseapp.com",
  projectId:"trendcart-5861e"
 });
-
 const db = getFirestore(app);
 
 let all=[];
 
 /* FETCH */
 const snap = await getDocs(collection(db,"products"));
-snap.forEach(doc=>{
- all.push({...doc.data(), id:doc.id});
-});
+snap.forEach(doc=> all.push({...doc.data(), id:doc.id}));
 
 /* SEARCH */
 document.getElementById("searchInput").addEventListener("input",(e)=>{
@@ -271,102 +232,130 @@ all.forEach(p=>p.category && cats.add(p.category));
 
 let cHTML=`<button onclick="filter('all')">All</button>`;
 cats.forEach(c=>cHTML+=`<button onclick="filter('${c}')">${c}</button>`);
-
 document.getElementById("categoryBar").innerHTML=cHTML;
 
 /* SLIDER */
 function buildSlider(){
- let top = all.slice(0,5);
  let html="";
- top.forEach(p=>{
+ all.slice(0,5).forEach(p=>{
   html+=`<div class="slide"><img src="${p.image}"></div>`;
  });
  document.getElementById("slides").innerHTML=html;
 
  let i=0;
  setInterval(()=>{
-  i=(i+1)%top.length;
+  i=(i+1)%5;
   document.getElementById("slides").style.transform=`translateX(-${i*100}%)`;
  },3000);
 }
 
-/* PRODUCTS */
+/* PROCESS + SORT */
+function processProducts(data){
+ return data.map(p=>{
+  let price = p.price ? parseInt(p.price) : null;
+  let discount = Math.floor(Math.random()*30+20);
+  let oldPrice = price ? Math.floor(price/(1-discount/100)) : null;
+
+  return {...p, price, discount, oldPrice};
+ }).sort((a,b)=>b.discount-a.discount);
+}
+
+/* SHOW */
 function show(data){
+
+ let processed = processProducts(data);
+
+ let top = processed[0];
+ let rest = processed.slice(1);
+
  let html="";
 
- data.forEach(p=>{
-
-  let price = parseInt(p.price);
-  if(!price || price<=0) price = null;
-
-  html+=`
-  <div class="card">
-
-    <div class="badge">🔥 Trending</div>
-
-    <div class="image-box">
-      <img src="${p.image}">
-    </div>
-
-    <div class="content">
-
-      <h3>${p.name || ""}</h3>
+ /* 🏆 TOP DEAL */
+ if(top){
+ html+=`
+ <div style="padding:15px">
+  <div style="background:#1e293b;border-radius:20px;overflow:hidden">
+    <img src="${top.image}" style="width:100%;height:200px;object-fit:contain;background:white">
+    <div style="padding:15px">
+      <div style="color:#22c55e;font-size:12px">🏆 BEST DEAL</div>
+      <h2>${top.name}</h2>
 
       <div class="rating">
-        ⭐ ${(Math.random()*1+4).toFixed(1)}
-        <span>(${Math.floor(Math.random()*4000+1000)})</span>
+        ⭐ ${(Math.random()*0.7+4.2).toFixed(1)}
+        <span>(${Math.floor(Math.random()*3000+500)})</span>
       </div>
 
       <div class="price-row">
-        ${price ? `<span class="price">₹${price}</span>` : `<span class="price">Check Price</span>`}
-        ${price ? `<span class="old-price">₹${Math.floor(price*1.4)}</span>` : ""}
-        ${price ? `<span class="discount">${Math.floor(Math.random()*30+20)}% OFF</span>` : ""}
+        <span class="price">₹${top.price}</span>
+        <span class="old-price">₹${top.oldPrice}</span>
+        <span class="discount">${top.discount}% OFF</span>
       </div>
 
-      <a class="btn" href="${p.link}" target="_blank">Buy Now</a>
-
-      <div class="share">
-        <button onclick="shareWhatsApp('${p.name}','${p.link}')">📱</button>
-        <button onclick="shareTelegram('${p.name}','${p.link}')">📢</button>
-        <button onclick="copyLink('${p.link}')">🔗</button>
-      </div>
-
+      <a class="btn" href="${top.link}" target="_blank">Buy Now</a>
     </div>
+  </div>
+ </div>`;
+ }
 
-  </div>`;
+ /* GRID */
+ html+=`<div class="grid">`;
+
+ rest.forEach(p=>{
+ html+=`
+ <div class="card">
+
+   <div class="badge">🔥 ${p.discount}% OFF</div>
+
+   <div class="image-box">
+     <img src="${p.image}">
+   </div>
+
+   <div class="content">
+
+     <h3>${p.name}</h3>
+
+     <div class="rating">
+       ⭐ ${(Math.random()*0.7+4.2).toFixed(1)}
+       <span>(${Math.floor(Math.random()*3000+500)})</span>
+     </div>
+
+     <div class="price-row">
+       ${p.price ? `<span class="price">₹${p.price}</span>` : `<span class="price">Check Price</span>`}
+       ${p.oldPrice ? `<span class="old-price">₹${p.oldPrice}</span>` : ""}
+       ${p.price ? `<span class="discount">${p.discount}% OFF</span>` : ""}
+     </div>
+
+     <a class="btn" href="${p.link}" target="_blank">Buy Now</a>
+
+     <div class="share">
+       <button onclick="shareWhatsApp('${p.name}','${p.link}')">📱</button>
+       <button onclick="copyLink('${p.link}')">🔗</button>
+     </div>
+
+   </div>
+ </div>`;
  });
+
+ html+=`</div>`;
 
  document.getElementById("products").innerHTML=html;
 }
 
 /* SHARE */
-window.shareWhatsApp = (name, link) => {
- let url = `https://wa.me/?text=${encodeURIComponent("🔥 " + name + " 👉 " + link)}`;
- window.open(url, '_blank');
-};
-
-window.shareTelegram = (name, link) => {
- let url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(name)}`;
- window.open(url, '_blank');
-};
-
-window.copyLink = (link) => {
- navigator.clipboard.writeText(link);
- showToast("Link copied!");
-};
+window.shareWhatsApp=(n,l)=>window.open(`https://wa.me/?text=${encodeURIComponent("🔥 "+n+" 👉 "+l)}`);
+window.copyLink=(l)=>{navigator.clipboard.writeText(l);toast("Link copied");};
 
 /* TOAST */
-function showToast(msg){
- let t = document.getElementById("toast");
- t.innerText = msg;
- t.style.display = "block";
- setTimeout(()=> t.style.display="none",2000);
+function toast(msg){
+ let t=document.getElementById("toast");
+ t.innerText=msg;
+ t.style.display="block";
+ setTimeout(()=>t.style.display="none",2000);
 }
 
 /* BLOG */
 function generateBlogs(){
  let map={};
-
  all.forEach(p=>{
   if(!p.category) return;
   if(!map[p.category]) map[p.category]=[];
@@ -375,15 +364,10 @@ function generateBlogs(){
 
  let html="";
  Object.keys(map).slice(0,5).forEach(cat=>{
-  let items = map[cat].slice(0,3);
-
   html+=`
   <div class="blog">
-    <h2>Best ${cat} Deals in India</h2>
-    <p>
-      Discover top ${cat.toLowerCase()} products like 
-      ${items.map(p=>p.name).join(", ")}.
-    </p>
+    <h2>Best ${cat} Deals</h2>
+    <p>${map[cat].slice(0,3).map(p=>p.name).join(", ")}</p>
   </div>`;
  });
 
