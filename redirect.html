@@ -2,23 +2,41 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+// 🔥 Your Firebase config
 const app = initializeApp({
- apiKey:"YOUR_API_KEY",
- authDomain:"YOUR_DOMAIN",
- projectId:"YOUR_PROJECT_ID"
+  apiKey:"AIzaSyAfRb-kddB4m6g7Jo7F29kKUwgzVKEjMyk",
+ authDomain:"trendcart-5861e.firebaseapp.com",
+ projectId:"trendcart-5861e"
 });
 
 const db = getFirestore(app);
 
-let p=new URLSearchParams(location.search);
-let url=p.get("url");
-let id=p.get("id");
+// ✅ MAIN FUNCTION
+async function handleRedirect() {
 
-if(id){
- await updateDoc(doc(db,"products",id),{
-  clicks: increment(1)
- });
+  const p = new URLSearchParams(window.location.search);
+  const url = p.get("url");
+  const id = p.get("id");
+
+  try {
+    // 🔥 Update click count
+    if (id) {
+      await updateDoc(doc(db, "products", id), {
+        clicks: increment(1)
+      });
+    }
+  } catch (e) {
+    console.error("Error updating clicks", e);
+  }
+
+  // 🔁 Redirect anyway
+  if (url) {
+    window.location.href = decodeURIComponent(url);
+  } else {
+    document.body.innerHTML = "Invalid URL";
+  }
 }
 
-location=url;
+// 🚀 Run function
+handleRedirect();
 </script>
