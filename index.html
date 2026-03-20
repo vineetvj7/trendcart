@@ -249,91 +249,57 @@ function buildSlider(){
  },3000);
 }
 
-/* PROCESS + SORT */
-function processProducts(data){
- return data.map(p=>{
-  let price = p.price ? parseInt(p.price) : null;
-  let discount = Math.floor(Math.random()*30+20);
-  let oldPrice = price ? Math.floor(price/(1-discount/100)) : null;
-
-  return {...p, price, discount, oldPrice};
- }).sort((a,b)=>b.discount-a.discount);
-}
-
-/* SHOW */
+/* PRODUCTS (FINAL CLEAN) */
 function show(data){
 
- let processed = processProducts(data);
+ let html=`<div class="grid">`;
 
- let top = processed[0];
- let rest = processed.slice(1);
+ data.forEach(p=>{
 
- let html="";
+  let price = p.price ? parseInt(p.price) : null;
 
- /* 🏆 TOP DEAL */
- if(top){
- html+=`
- <div style="padding:15px">
-  <div style="background:#1e293b;border-radius:20px;overflow:hidden">
-    <img src="${top.image}" style="width:100%;height:200px;object-fit:contain;background:white">
-    <div style="padding:15px">
-      <div style="color:#22c55e;font-size:12px">🏆 BEST DEAL</div>
-      <h2>${top.name}</h2>
+  let rating = (Math.random()*0.7 + 4.2).toFixed(1);
+  let reviews = Math.floor(Math.random()*3000 + 500);
+  let discount = Math.floor(Math.random()*30 + 20);
+
+  let oldPrice = price 
+    ? Math.floor(price / (1 - discount/100)) 
+    : null;
+
+  html+=`
+  <div class="card">
+
+    <div class="badge">🔥 Trending</div>
+
+    <div class="image-box">
+      <img src="${p.image}">
+    </div>
+
+    <div class="content">
+
+      <h3>${p.name || ""}</h3>
 
       <div class="rating">
-        ⭐ ${(Math.random()*0.7+4.2).toFixed(1)}
-        <span>(${Math.floor(Math.random()*3000+500)})</span>
+        ⭐ ${rating}
+        <span>(${reviews})</span>
       </div>
 
       <div class="price-row">
-        <span class="price">₹${top.price}</span>
-        <span class="old-price">₹${top.oldPrice}</span>
-        <span class="discount">${top.discount}% OFF</span>
+        ${price ? `<span class="price">₹${price}</span>` : `<span class="price">Check Price</span>`}
+        ${oldPrice ? `<span class="old-price">₹${oldPrice}</span>` : ""}
+        ${price ? `<span class="discount">${discount}% OFF</span>` : ""}
       </div>
 
-      <a class="btn" href="${top.link}" target="_blank">Buy Now</a>
+      <a class="btn" href="${p.link}" target="_blank">Buy Now</a>
+
+      <div class="share">
+        <button onclick="shareWhatsApp('${p.name}','${p.link}')">📱</button>
+        <button onclick="copyLink('${p.link}')">🔗</button>
+      </div>
+
     </div>
-  </div>
- </div>`;
- }
 
- /* GRID */
- html+=`<div class="grid">`;
-
- rest.forEach(p=>{
- html+=`
- <div class="card">
-
-   <div class="badge">🔥 ${p.discount}% OFF</div>
-
-   <div class="image-box">
-     <img src="${p.image}">
-   </div>
-
-   <div class="content">
-
-     <h3>${p.name}</h3>
-
-     <div class="rating">
-       ⭐ ${(Math.random()*0.7+4.2).toFixed(1)}
-       <span>(${Math.floor(Math.random()*3000+500)})</span>
-     </div>
-
-     <div class="price-row">
-       ${p.price ? `<span class="price">₹${p.price}</span>` : `<span class="price">Check Price</span>`}
-       ${p.oldPrice ? `<span class="old-price">₹${p.oldPrice}</span>` : ""}
-       ${p.price ? `<span class="discount">${p.discount}% OFF</span>` : ""}
-     </div>
-
-     <a class="btn" href="${p.link}" target="_blank">Buy Now</a>
-
-     <div class="share">
-       <button onclick="shareWhatsApp('${p.name}','${p.link}')">📱</button>
-       <button onclick="copyLink('${p.link}')">🔗</button>
-     </div>
-
-   </div>
- </div>`;
+  </div>`;
  });
 
  html+=`</div>`;
