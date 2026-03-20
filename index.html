@@ -26,16 +26,55 @@ body {
   background:#020617;
 }
 
-/* SEARCH */
-.search-box {
+/* 🔍 STICKY SEARCH */
+.search-wrapper {
+  position:sticky;
+  top:0;
+  background:#0f172a;
+  z-index:1000;
   padding:10px;
 }
+
+.search-box {
+  position:relative;
+}
+
 .search-box input {
   width:100%;
-  padding:12px;
+  padding:10px 12px 10px 35px;
   border-radius:25px;
   border:none;
   font-size:14px;
+  outline:none;
+  background:#1e293b;
+  color:white;
+}
+
+.search-icon {
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#94a3b8;
+}
+
+/* SUGGESTIONS */
+.suggestions {
+  background:#1e293b;
+  margin-top:5px;
+  border-radius:10px;
+  overflow:hidden;
+  display:none;
+}
+
+.suggestions div {
+  padding:10px;
+  border-bottom:1px solid #334155;
+  cursor:pointer;
+}
+
+.suggestions div:hover {
+  background:#334155;
 }
 
 /* CATEGORY */
@@ -45,13 +84,13 @@ body {
   gap:10px;
   padding:10px;
 }
+
 #categoryBar button {
   background:#1e293b;
   border:none;
   padding:8px 15px;
   border-radius:20px;
   color:white;
-  cursor:pointer;
 }
 
 /* GRID */
@@ -74,18 +113,17 @@ body {
 
 .card:hover {
   transform:translateY(-5px);
-  box-shadow:0 10px 25px rgba(0,0,0,0.5);
 }
 
 /* IMAGE */
 .image-box {
-  width:100%;
   aspect-ratio:1/1;
   background:white;
   display:flex;
   align-items:center;
   justify-content:center;
 }
+
 .image-box img {
   max-width:90%;
   max-height:90%;
@@ -97,19 +135,16 @@ body {
   padding:10px;
   display:flex;
   flex-direction:column;
-  flex-grow:1;
-  min-height:120px; /* keeps cards aligned */
+  min-height:120px;
 }
 
-/* ✅ FIXED TITLE */
+/* TITLE FIX */
 .content h3 {
   font-size:14px;
   line-height:1.3;
-
   display:-webkit-box;
   -webkit-line-clamp:2;
   -webkit-box-orient:vertical;
-
   overflow:hidden;
 }
 
@@ -117,20 +152,17 @@ body {
 .price {
   color:#22c55e;
   font-weight:bold;
-  font-size:16px;
 }
 
 /* BUTTON */
 .btn {
-  display:block;
   background:#16a34a;
-  text-align:center;
   padding:10px;
-  margin-top:10px;
+  text-align:center;
   border-radius:10px;
   color:white;
   text-decoration:none;
-  font-weight:bold;
+  margin-top:auto;
 }
 
 /* SHARE */
@@ -146,8 +178,6 @@ body {
   padding:10px;
   border-radius:10px;
   color:white;
-  font-size:14px;
-  cursor:pointer;
 }
 
 .share button:first-child {
@@ -162,11 +192,13 @@ body {
 .footer {
   padding:20px;
 }
+
 .footer div {
   display:flex;
   flex-wrap:wrap;
   gap:10px;
 }
+
 .footer span {
   background:#1e293b;
   padding:8px 12px;
@@ -181,8 +213,16 @@ body {
 
 <div class="header">🔥 Trending Deals</div>
 
-<div class="search-box">
-  <input type="text" id="searchInput" placeholder="Search deals...">
+<!-- 🔍 SEARCH -->
+<div class="search-wrapper">
+
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Search deals...">
+  </div>
+
+  <div id="suggestions" class="suggestions"></div>
+
 </div>
 
 <div id="categoryBar"></div>
@@ -199,7 +239,6 @@ body {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* FIREBASE */
 const app = initializeApp({
  apiKey:"AIzaSyAfRb-kddB4m6g7Jo7F29kKUwgzVKEjMyk",
  authDomain:"trendcart-5861e.firebaseapp.com",
@@ -210,92 +249,97 @@ const db = getFirestore(app);
 
 let all=[];
 
-/* FETCH DATA */
+/* FETCH */
 const snap = await getDocs(collection(db,"products"));
-
-snap.forEach(doc=>{
- all.push({...doc.data(), id:doc.id});
-});
-
-/* SEARCH */
-document.getElementById("searchInput").addEventListener("input",(e)=>{
- let val=e.target.value.toLowerCase();
- show(all.filter(p=> (p.name||"").toLowerCase().includes(val)));
-});
+snap.forEach(doc=> all.push({...doc.data(), id:doc.id}));
 
 /* CATEGORY */
 let cats=new Set();
 all.forEach(p=>p.category && cats.add(p.category));
 
-let cHTML=`<button onclick="filter('all')">All</button>`;
-cats.forEach(c=>cHTML+=`<button onclick="filter('${c}')">${c}</button>`);
+document.getElementById("categoryBar").innerHTML =
+ `<button onclick="filter('all')">All</button>` +
+ [...cats].map(c=>`<button onclick="filter('${c}')">${c}</button>`).join("");
 
-document.getElementById("categoryBar").innerHTML=cHTML;
-
-/* FOOTER */
 document.getElementById("footerCats").innerHTML =
  [...cats].map(c=>`<span>${c}</span>`).join("");
 
-/* PRODUCTS */
+/* SHOW */
 function show(data){
  let html="";
  data.forEach(p=>{
   html+=`
   <div class="card">
-
     <div class="image-box">
       <img src="${p.image}">
     </div>
 
     <div class="content">
       <h3>${p.name || ""}</h3>
-
       <div class="price">₹${p.price || ""}</div>
 
-      <a class="btn" href="${p.link}" target="_blank">
-        Buy Now
-      </a>
+      <a class="btn" href="${p.link}" target="_blank">Buy Now</a>
 
       <div class="share">
-        <button onclick="shareWhatsApp('${p.name}','${p.link}')">
-          📱 WhatsApp
-        </button>
-
-        <button onclick="shareNative('${p.name}','${p.link}')">
-          📤 Share
-        </button>
+        <button onclick="shareWhatsApp('${p.name}','${p.link}')">📱</button>
+        <button onclick="shareNative('${p.name}','${p.link}')">📤</button>
       </div>
     </div>
-
   </div>`;
  });
-
  document.getElementById("products").innerHTML=html;
 }
 
 /* FILTER */
 window.filter=(c)=> c==="all"?show(all):show(all.filter(p=>p.category===c));
 
-/* SHARE WHATSAPP */
-window.shareWhatsApp=(name,link)=>{
- let url=`https://wa.me/?text=${encodeURIComponent(name+" "+link)}`;
- window.open(url,'_blank');
-};
+/* SEARCH */
+const input = document.getElementById("searchInput");
+const suggestions = document.getElementById("suggestions");
 
-/* NATIVE SHARE */
-window.shareNative=(name,link)=>{
+input.addEventListener("input",(e)=>{
+ let val=e.target.value.toLowerCase();
 
- if(navigator.share){
-   navigator.share({
-     title:name,
-     text:"🔥 Check this deal",
-     url:link
-   });
- } else {
-   navigator.clipboard.writeText(link);
-   alert("Link copied! Paste on Instagram or anywhere.");
+ if(!val){
+  suggestions.style.display="none";
+  show(all);
+  return;
  }
 
+ let filtered = all.filter(p=> (p.name||"").toLowerCase().includes(val));
+ show(filtered);
+
+ let top = filtered.slice(0,5);
+
+ suggestions.innerHTML = top.map(p =>
+  `<div onclick="selectItem('${p.name}')">${p.name}</div>`
+ ).join("");
+
+ suggestions.style.display="block";
+});
+
+window.selectItem=(name)=>{
+ input.value=name;
+ suggestions.style.display="none";
+ show(all.filter(p=>p.name===name));
+};
+
+/* CLOSE SUGGESTIONS */
+document.addEventListener("click",(e)=>{
+ if(!e.target.closest(".search-wrapper")){
+  suggestions.style.display="none";
+ }
+});
+
+/* SHARE */
+window.shareWhatsApp=(n,l)=>window.open(`https://wa.me/?text=${encodeURIComponent(n+" "+l)}`);
+window.shareNative=(n,l)=>{
+ if(navigator.share){
+   navigator.share({title:n,url:l});
+ } else {
+   navigator.clipboard.writeText(l);
+   alert("Link copied!");
+ }
 };
 
 /* INIT */
