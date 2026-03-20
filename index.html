@@ -221,9 +221,9 @@ function show(data){
     </a>
 
     <div class="share">
-      <button onclick="shareWhatsApp('${p.name}','${redirectLink}')">📱</button>
-      <button onclick="shareTelegram('${p.name}','${redirectLink}')">📢</button>
-      <button onclick="copyLink('${redirectLink}')">🔗</button>
+      <button onclick="shareWhatsApp('${p.name}','${p.link}')">📱</button>
+      <button onclick="shareTelegram('${p.name}','${p.link}')">📢</button>
+      <button onclick="copyLink('${p.link}')">🔗</button>
     </div>
 
    </div>
@@ -239,23 +239,20 @@ window.filter = (c) => {
  else show(all.filter(p => p.category === c));
 };
 
-/* SHARE FUNCTIONS */
+/* SHARE FUNCTIONS (AMAZON LINK ONLY ✅) */
 window.shareWhatsApp = (name, link) => {
-  const fullLink = window.location.origin + "/" + link;
- let url = `https://wa.me/?text=${encodeURIComponent(name + " " + fullLink)}`;
+ let url = `https://wa.me/?text=${encodeURIComponent("🔥 " + name + " 👉 " + link)}`;
  window.open(url, '_blank');
 };
 
 window.shareTelegram = (name, link) => {
-  const fullLink = window.location.origin + "/" + link;
- let url = `https://t.me/share/url?url=${encodeURIComponent(fullLink)}&text=${encodeURIComponent(name)}`;
+ let url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(name)}`;
  window.open(url, '_blank');
 };
 
 window.copyLink = (link) => {
- const fullLink = window.location.origin + "/" + link;
- navigator.clipboard.writeText(fullLink);
-
+ navigator.clipboard.writeText(link);
+ alert("Amazon link copied!");
 };
 
 /* INIT */
