@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>🔥 Trending Deals India</title>
+<title>Trending Deals</title>
 
 <style>
 
@@ -25,9 +25,10 @@ body {
   font-weight:bold;
 }
 
-/* TOP BAR */
-.top-bar { padding:10px; }
-
+/* SEARCH */
+.search-box {
+  padding:10px;
+}
 .search-box input {
   width:100%;
   padding:12px;
@@ -40,7 +41,7 @@ body {
   display:flex;
   overflow:auto;
   gap:10px;
-  margin-top:10px;
+  padding:10px;
 }
 #categoryBar button {
   background:#1e293b;
@@ -48,20 +49,45 @@ body {
   padding:8px 15px;
   border-radius:20px;
   color:white;
+  cursor:pointer;
 }
 
-/* SLIDER */
-.slider { overflow:hidden;margin:10px;border-radius:12px; }
-.slides { display:flex;transition:0.5s; }
-.slide { min-width:100%; }
-.slide img { width:100%;height:180px;object-fit:cover; }
+/* SLIDER FIX */
+.slider {
+  overflow:hidden;
+  margin:10px;
+  border-radius:12px;
+  background:#0f172a;
+  box-shadow:0 10px 30px rgba(0,0,0,0.6);
+}
+
+.slides {
+  display:flex;
+  transition:0.5s;
+}
+
+.slide {
+  min-width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:180px;
+}
+
+/* 🔥 NO CUT / NO STRETCH */
+.slide img {
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+}
 
 /* GRID */
 .grid {
   display:grid;
-  grid-template-columns:repeat(2,1fr);
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
   gap:15px;
   padding:15px;
+  align-items:start;
 }
 
 /* CARD */
@@ -69,65 +95,50 @@ body {
   background:#1e293b;
   border-radius:16px;
   overflow:hidden;
-  position:relative;
+  display:flex;
+  flex-direction:column;
+  transition:0.3s;
 }
 
-.badge {
-  position:absolute;
-  top:8px;
-  left:8px;
-  background:red;
-  padding:4px 8px;
-  font-size:11px;
-  border-radius:6px;
+.card:hover {
+  transform:translateY(-5px);
+  box-shadow:0 10px 25px rgba(0,0,0,0.5);
 }
 
-/* IMAGE */
+/* IMAGE FIX */
 .image-box {
-  height:160px;
+  width:100%;
+  aspect-ratio:1/1;
   background:white;
   display:flex;
   align-items:center;
   justify-content:center;
 }
+
 .image-box img {
-  max-width:100%;
-  max-height:100%;
+  max-width:90%;
+  max-height:90%;
+  object-fit:contain;
 }
 
 /* CONTENT */
-.content { padding:10px; }
+.content {
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  flex-grow:1;
+}
 
 .content h3 {
   font-size:14px;
-  display:-webkit-box;
-  -webkit-line-clamp:2;
-  -webkit-box-orient:vertical;
+  height:40px;
   overflow:hidden;
 }
 
-/* RATING */
-.rating { color:#facc15;font-size:13px; }
-.rating span { color:#94a3b8;font-size:11px; }
-
 /* PRICE */
-.price-row {
-  display:flex;
-  gap:6px;
-  align-items:center;
-}
-.price { color:#22c55e;font-weight:bold; }
-.old-price {
-  text-decoration:line-through;
-  color:#94a3b8;
-  font-size:12px;
-}
-.discount {
-  background:#22c55e;
-  color:black;
-  font-size:11px;
-  padding:2px 5px;
-  border-radius:4px;
+.price {
+  color:#22c55e;
+  font-weight:bold;
 }
 
 /* BUTTON */
@@ -136,7 +147,7 @@ body {
   background:#16a34a;
   text-align:center;
   padding:10px;
-  margin-top:10px;
+  margin-top:auto;
   border-radius:10px;
   color:white;
   text-decoration:none;
@@ -145,52 +156,35 @@ body {
 /* SHARE */
 .share {
   display:flex;
-  justify-content:center;
-  gap:8px;
-  margin-top:8px;
+  gap:10px;
+  margin-top:10px;
 }
 .share button {
+  flex:1;
   background:#334155;
   border:none;
-  padding:6px;
-  border-radius:6px;
+  padding:8px;
+  border-radius:8px;
   color:white;
+  cursor:pointer;
 }
 
 /* FOOTER */
-#footer {
-  background:#020617;
-  padding:15px;
-  text-align:center;
+.footer {
+  padding:20px;
 }
-
-.footer-cats {
+.footer h3 {
+  font-size:16px;
+}
+.footer div {
   display:flex;
   flex-wrap:wrap;
-  justify-content:center;
   gap:10px;
 }
-
-.footer-cats button {
+.footer span {
   background:#1e293b;
-  border:none;
-  padding:6px 12px;
+  padding:8px 12px;
   border-radius:20px;
-  color:white;
-  font-size:12px;
-}
-
-/* TOAST */
-#toast {
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#22c55e;
-  color:black;
-  padding:10px 15px;
-  border-radius:8px;
-  display:none;
 }
 
 </style>
@@ -199,24 +193,24 @@ body {
 
 <body>
 
-<div class="header">🔥 Trending Deals</div>
+<div class="header">Trending Deals</div>
 
-<div class="top-bar">
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Search deals...">
-  </div>
-  <div id="categoryBar"></div>
+<div class="search-box">
+  <input type="text" id="searchInput" placeholder="Search deals...">
 </div>
+
+<div id="categoryBar"></div>
 
 <div class="slider">
   <div class="slides" id="slides"></div>
 </div>
 
-<div id="products"></div>
+<div id="products" class="grid"></div>
 
-<div id="footer"></div>
-
-<div id="toast"></div>
+<div class="footer">
+  <h3>Categories</h3>
+  <div id="footerCats"></div>
+</div>
 
 <script type="module">
 
@@ -229,13 +223,17 @@ const app = initializeApp({
  authDomain:"trendcart-5861e.firebaseapp.com",
  projectId:"trendcart-5861e"
 });
+
 const db = getFirestore(app);
 
 let all=[];
 
-/* FETCH */
+/* FETCH DATA */
 const snap = await getDocs(collection(db,"products"));
-snap.forEach(doc=> all.push({...doc.data(), id:doc.id}));
+
+snap.forEach(doc=>{
+ all.push({...doc.data(), id:doc.id});
+});
 
 /* SEARCH */
 document.getElementById("searchInput").addEventListener("input",(e)=>{
@@ -249,122 +247,79 @@ all.forEach(p=>p.category && cats.add(p.category));
 
 let cHTML=`<button onclick="filter('all')">All</button>`;
 cats.forEach(c=>cHTML+=`<button onclick="filter('${c}')">${c}</button>`);
+
 document.getElementById("categoryBar").innerHTML=cHTML;
 
-/* SLIDER FIXED */
-function buildSlider(){
+/* FOOTER */
+document.getElementById("footerCats").innerHTML =
+ [...cats].map(c=>`<span>${c}</span>`).join("");
 
+/* SLIDER FIX */
+function buildSlider(){
  let top = all.slice(0,5);
  let html="";
-
  top.forEach(p=>{
   html+=`<div class="slide"><img src="${p.image}"></div>`;
  });
-
  document.getElementById("slides").innerHTML=html;
 
  let i=0;
-
- setInterval(()=>{
-  i = (i + 1) % top.length; // ✅ FIX
-  document.getElementById("slides").style.transform =
-    `translateX(-${i*100}%)`;
- },3000);
+ if(top.length > 1){
+   setInterval(()=>{
+    i=(i+1)%top.length;
+    document.getElementById("slides").style.transform=`translateX(-${i*100}%)`;
+   },3000);
+ }
 }
 
 /* PRODUCTS */
 function show(data){
-
- let html=`<div class="grid">`;
-
+ let html="";
  data.forEach(p=>{
-
-  let price = p.price ? parseInt(p.price) : null;
-
-  let rating = (Math.random()*0.7 + 4.2).toFixed(1);
-  let reviews = Math.floor(Math.random()*3000 + 500);
-  let discount = Math.floor(Math.random()*30 + 20);
-
-  let oldPrice = price 
-    ? Math.floor(price / (1 - discount/100)) 
-    : null;
-
   html+=`
   <div class="card">
-
-    <div class="badge">🔥 Trending</div>
 
     <div class="image-box">
       <img src="${p.image}">
     </div>
 
     <div class="content">
-
       <h3>${p.name || ""}</h3>
 
-      <div class="rating">
-        ⭐ ${rating}
-        <span>(${reviews})</span>
-      </div>
+      <div class="price">₹${p.price || ""}</div>
 
-      <div class="price-row">
-        ${price ? `<span class="price">₹${price}</span>` : `<span class="price">Check Price</span>`}
-        ${oldPrice ? `<span class="old-price">₹${oldPrice}</span>` : ""}
-        ${price ? `<span class="discount">${discount}% OFF</span>` : ""}
-      </div>
-
-      <a class="btn" href="${p.link}" target="_blank">Buy Now</a>
+      <a class="btn" href="${p.link}" target="_blank">
+        Buy Now
+      </a>
 
       <div class="share">
-        <button onclick="shareWhatsApp('${p.name}','${p.link}')">📱</button>
-        <button onclick="copyLink('${p.link}')">🔗</button>
+        <button onclick="shareWA('${p.name}','${p.link}')">WA</button>
+        <button onclick="copyLink('${p.link}')">Copy</button>
       </div>
-
     </div>
 
   </div>`;
  });
 
- html+=`</div>`;
-
  document.getElementById("products").innerHTML=html;
-}
-
-/* SHARE */
-window.shareWhatsApp=(n,l)=>window.open(`https://wa.me/?text=${encodeURIComponent("🔥 "+n+" 👉 "+l)}`);
-window.copyLink=(l)=>{navigator.clipboard.writeText(l);toast("Link copied");};
-
-/* TOAST */
-function toast(msg){
- let t=document.getElementById("toast");
- t.innerText=msg;
- t.style.display="block";
- setTimeout(()=>t.style.display="none",2000);
-}
-
-/* FOOTER */
-function buildFooter(){
-
- let html = `<div class="footer-cats">`;
-
- html += `<button onclick="filter('all')">All</button>`;
-
- cats.forEach(c=>{
-  html += `<button onclick="filter('${c}')">${c}</button>`;
- });
-
- html += `</div>`;
-
- document.getElementById("footer").innerHTML = html;
 }
 
 /* FILTER */
 window.filter=(c)=> c==="all"?show(all):show(all.filter(p=>p.category===c));
 
+/* SHARE */
+window.shareWA=(name,link)=>{
+ let url=`https://wa.me/?text=${encodeURIComponent(name+" "+link)}`;
+ window.open(url);
+};
+
+window.copyLink=(link)=>{
+ navigator.clipboard.writeText(link);
+};
+
 /* INIT */
 buildSlider();
 show(all);
-buildFooter();
 
 </script>
 
